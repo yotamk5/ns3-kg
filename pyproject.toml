@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ns3kg"
+version = "0.1.0"
+description = "ns-3 knowledge graph: source indexer + MCP server for precise code lookups"
+requires-python = ">=3.10"
+dependencies = [
+    # <2 is required: mcp 2.0 removed mcp.server.fastmcp, which server/app.py uses.
+    # Migrating to the 2.x API is a separate task -- until then this pin keeps
+    # fresh installs (Linux included) reproducible.
+    "mcp>=1.0,<2",
+    "tree-sitter>=0.25",
+    "tree-sitter-cpp>=0.23",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+ns3kg-index = "ns3kg.cli:main"
+ns3kg-server = "ns3kg.server.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"ns3kg.indexer" = ["queries/*.scm"]

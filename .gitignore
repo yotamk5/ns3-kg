@@ -1,0 +1,14 @@
+# Virtual environment (platform-specific, rebuild with pip install -e ".[dev]")
+.venv/
+
+# Built indexes: large, machine-specific (meta.root stores an absolute path).
+# Always rebuild locally with ns3kg-index -- see INSTALL.md.
+*.db
+
+# Python build/cache artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
