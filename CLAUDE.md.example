@@ -1,0 +1,45 @@
+<!-- TEMPLATE: copy this to CLAUDE.md (or AGENTS.md) in the folder where you
+     run your agent -- i.e. the folder containing your ns-3 tree, not this
+     repo. It tells the agent to prefer the ns3-kg tools over reading files,
+     and where to aim lookups. Adjust the paths and conventions to your work. -->
+
+# ns3 map — working rules
+
+## Use the ns3-kg MCP tools instead of reading files
+
+This project has an `ns3-kg` MCP server indexing all of `ns-3.48/`. For any
+question about the ns-3 code — where something is, its signature, who calls
+it, what attributes/traces a class has — call the MCP tools first; only read
+a file directly after a tool has given you its path and line range (then use
+`get_source`, or the Read tool for >200-line stretches).
+
+- Discover names: `search_symbols` → exact decl: `get_signature` → body:
+  `get_source` → callers: `find_usages` (textual candidates — verify).
+- ns-3 specifics: `get_typeid_attributes` (config knobs + traces per class),
+  `find_trace_sources`, `get_inheritance_chain`,
+  `resolve_config_path` (Config strings → owning class).
+- If answers look wrong, call `get_index_status`; if it warns, ask me to run
+  `ns3kg-index` (do not run it yourself against a dirty tree).
+
+## ns-3 wifi map (where to aim lookups, all under `src/wifi/model/`)
+
+- `ap-wifi-mac`, `sta-wifi-mac` (+ base `wifi-mac`): AP/STA MAC logic —
+  association, beacons, per-AC queues.
+- `txop`, `qos-txop`, `channel-access-manager`: EDCA channel access,
+  TXOP handling, block ack agreements.
+- `frame-exchange-manager` (+ `qos-`, `he/he-` variants): the TX/RX state
+  machine per amendment; most "why was this frame sent" answers live here.
+- `he/multi-user-scheduler`, `he/rr-multi-user-scheduler`: DL/UL OFDMA MU
+  scheduling decisions (my main work area).
+- `wifi-remote-station-manager` + `rate-control/` (Minstrel-HT etc.): rate
+  control; per-station state.
+- `wifi-phy`, `spectrum-wifi-phy`, `wifi-mac-queue`: PHY and queueing.
+
+## My conventions
+
+- Before changing ANY function signature: `find_usages` on it and check the
+  call sites; ns-3 uses callbacks heavily, so textual hits need verifying.
+- New simulation code: prefer extending an example in `examples/wireless/`
+  over creating scratch files.
+- Follow `ns-3.48/CLAUDE.md` (build/test/style) when editing inside the tree.
+- Keep explanations of architecture simple and jargon-free.

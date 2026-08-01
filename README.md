@@ -95,6 +95,13 @@ Start a **new** session in that folder; approve the server when prompted.
 MCP servers are loaded at session start, so config changes need a new
 session.
 
+**Steer the agent toward the tools.** Registering the server makes the
+tools available; a short instructions file makes the agent actually reach
+for them. Copy [CLAUDE.md.example](CLAUDE.md.example) to `CLAUDE.md` (or
+`AGENTS.md`, depending on your client) in that same folder and adapt it —
+it says "query the index before reading files" and maps where to aim
+lookups in the ns-3 wifi stack.
+
 ## Registering with other agent clients
 
 The server speaks standard MCP over stdio — nothing in it is Claude-specific.
