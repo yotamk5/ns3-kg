@@ -98,8 +98,22 @@ in the Linux home directory.
 
 ## 4. Register the server with your AI client
 
+> ### ⚠️ You never start the server yourself
+>
+> `ns3kg-server` is not an interactive program. It speaks JSON-RPC over
+> stdin/stdout and is started **automatically, as a subprocess, by your
+> agent client**. If you launch it in a terminal it will appear to hang,
+> and pressing Enter prints:
+>
+> `Invalid JSON: EOF while parsing a value ... "Internal Server Error"`
+>
+> That message means the server is *working* — it received your keystroke
+> where it expected protocol data. Press `Ctrl+C` and register it instead.
+> To check the install, use `check_install.py` (section 5).
+
 The server is launched by the **MCP client** (the assistant extension), not
-by the IDE itself. All clients need the same two things:
+by the IDE itself. All clients need the same two things, written into that
+client's **configuration** — not typed into a shell:
 
 - **command** — the absolute path to `ns3kg-server`
 - **args** — `["--db", "<absolute path to ns3.db>"]`
@@ -128,12 +142,26 @@ not see it.
 
 ### Any other MCP-capable client
 
-Same two fields in that client's own config format. If it accepts a plain
-command line, this also works and avoids the entry-point path:
+Cline, Continue, Cursor, Zed and others each have their own MCP settings
+file or UI panel, but they all want the same two fields. Put the values
+there — again, these are *config values*, not commands to run:
 
-```bash
+```text
+command:  /home/you/ns3-kg/.venv/bin/ns3kg-server
+args:     ["--db", "/home/you/ns3-kg/ns3.db"]
+```
+
+If a client insists on a single command string, this equivalent form works
+and avoids depending on the entry-point script:
+
+```text
 /home/you/ns3-kg/.venv/bin/python -m ns3kg.server.app --db /home/you/ns3-kg/ns3.db
 ```
+
+Every client needs *some* registration — only the file name and format
+differ (`.mcp.json` is Claude Code's; Cline uses its own MCP settings
+file, Cursor a settings panel, and so on). Registering it somewhere is not
+optional: without it, the client has no idea the server exists.
 
 ### VS Code + WSL
 
@@ -145,7 +173,18 @@ every path in the config is a Linux path (`/home/you/...`), not `C:\...`.
 
 ## 5. Verify it works
 
-Ask the assistant, in a fresh session:
+**First, check the install itself** — this script starts the server the way
+a client would, queries it, and prints PASS or FAIL with a fix:
+
+```bash
+.venv/bin/python check_install.py --db ~/ns3-kg/ns3.db
+```
+
+A healthy result reports 9 tools, your file/symbol counts, and a sample
+hit. (On Windows: `.venv\Scripts\python check_install.py --db ...\ns3.db`.)
+
+**Then check the client integration.** Ask the assistant, in a fresh
+session:
 
 > using the ns3-kg tools, what is the signature of ApWifiMac::Enqueue?
 
@@ -190,6 +229,13 @@ Confirm with `.venv/bin/pip show mcp` — expect 1.x.
 **`ensurepip is not available` / venv creation fails (Ubuntu)**
 Install `python3-venv` (see §1). On some images the versioned package is
 required, e.g. `sudo apt install python3.12-venv`.
+
+**`Invalid JSON: EOF while parsing a value` / `Internal Server Error`, repeating**
+You started the server manually in a terminal. It is not interactive: it
+expects JSON-RPC on stdin, so your Enter keypresses produce that error.
+Nothing is broken. Press `Ctrl+C`, run `check_install.py` (§5) to confirm
+the install, then register the server in your client (§4) and let *it*
+start the server.
 
 **`index not found` when the server starts**
 The `--db` path in the client config is wrong, or the index was never
